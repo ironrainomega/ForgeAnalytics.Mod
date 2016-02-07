@@ -1,9 +1,6 @@
 package com.tamashenning.forgeanalytics.proxies;
 
-import java.util.HashMap;
-
 import com.tamashenning.forgeanalytics.AnalyticsClient;
-import com.tamashenning.forgeanalytics.models.AnalyticsModel;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -25,7 +22,9 @@ public class ClientProxy extends CommonProxy {
         super.postInit(e);
         
         AnalyticsClient ac = new AnalyticsClient();
-        AnalyticsModel am = new AnalyticsModel();
+        // System.out.println(ac.SendClientStartupPing());
+        
+        /*AnalyticsModel am = new AnalyticsModel();
         am.ClientDateTimeEpoch = 5;
         am.PartitionKey = "PING";
         am.Table = "ClientAnalytics";
@@ -37,6 +36,6 @@ public class ClientProxy extends CommonProxy {
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		}*/
     }
 }
