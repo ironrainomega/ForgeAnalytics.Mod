@@ -12,6 +12,8 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod(modid = ForgeAnalyticsMod.MODID, name = ForgeAnalyticsMod.MODNAME, version = ForgeAnalyticsMod.VERSION)
 public class ForgeAnalyticsMod {
@@ -54,16 +56,15 @@ public class ForgeAnalyticsMod {
 		}
         
     }  
+    @SideOnly(Side.CLIENT)
     @EventHandler
-    public void fmlLoaded(FMLLoadCompleteEvent e, boolean client){
-    	if (client) {
-    		AnalyticsClient ac = new AnalyticsClient();
-    		try {
-				ac.UploadModel(ac.CreateClientStartupPing());
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-    	}
+    public void fmlLoaded(FMLLoadCompleteEvent e){
+    	AnalyticsClient ac = new AnalyticsClient();
+    	try {
+			ac.UploadModel(ac.CreateClientStartupPing());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 }

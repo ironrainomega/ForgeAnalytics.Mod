@@ -64,12 +64,13 @@ public class AnalyticsClient {
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
 		
-		try {
-			am.Properties.put("UserHash", this.Anonymize(Minecraft.getMinecraft().thePlayer.getUniqueID().toString()));
+		/*try {
+			// TODO figure this out...
+			// am.Properties.put("UserHash", this.Anonymize(Minecraft.getMinecraft().thePlayer.getUniqueID().toString()));
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		String json = g.toJson(am);
 		return json;
