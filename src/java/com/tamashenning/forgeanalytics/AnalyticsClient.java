@@ -12,6 +12,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.gson.Gson;
+import com.tamashenning.forgeanalyitcs.client.ForgeAnalyticsConstants;
+import com.tamashenning.forgeanalyitcs.client.ForgeAnalyticsSingleton;
 import com.tamashenning.forgeanalytics.models.AnalyticsModel;
 
 import net.minecraft.client.Minecraft;
@@ -21,10 +23,6 @@ import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.ModContainer;
 
 public class AnalyticsClient {
-	
-	private String pingClientTable = "ClientTable";
-	private String pingServerTable = "ServerTable";
-	private final int HASHCOUNT = 5;
 	
 	public boolean UploadModel(AnalyticsModel model) throws Exception {
 		Gson g = new Gson();
@@ -58,9 +56,9 @@ public class AnalyticsClient {
 		Gson g = new Gson();
 		
 		AnalyticsModel am = new AnalyticsModel();
-		am.Table = this.pingClientTable;
+		am.Table = ForgeAnalyticsConstants.pingClientTable;
 		am.Properties = new HashMap<String, String>();
-		am.PartitionKey = "PING";
+		am.PartitionKey = ForgeAnalyticsConstants.pingClientStartCommand;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
 		
@@ -80,9 +78,9 @@ public class AnalyticsClient {
 		Gson g = new Gson();
 		
 		AnalyticsModel am = new AnalyticsModel();
-		am.Table = this.pingServerTable;
+		am.Table = ForgeAnalyticsConstants.pingServerTable;
 		am.Properties = new HashMap<String, String>();
-		am.PartitionKey = "PING";
+		am.PartitionKey = ForgeAnalyticsConstants.pingServerStartCommand;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
 		am.Properties.put("ServerDifficulty", MinecraftServer.getServer().getDifficulty().toString());
@@ -109,6 +107,97 @@ public class AnalyticsClient {
 		return json;
 	}
 	
+	public String CreateServerStoppedPing() {
+		Gson g = new Gson();
+
+		AnalyticsModel am = new AnalyticsModel();
+		am.Table = ForgeAnalyticsConstants.pingServerTable;
+		am.Properties = new HashMap<String, String>();
+		am.PartitionKey = ForgeAnalyticsConstants.pingServerStopCommand;
+		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
+		am.Properties.putAll(this.getCommonValues());
+		am.Properties.put("ServerDifficulty", MinecraftServer.getServer().getDifficulty().toString());
+		
+		MinecraftServer server = MinecraftServer.getServer();
+		
+		if (MinecraftServer.getServer().isDedicatedServer()) {
+			// Running dedicated...
+			try {
+				am.Properties.put("ServerHostHash", this.Anonymize(server.getHostname()));
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			// Running internal...
+			am.Properties.put("ServerHostHash", "localhost");
+			am.Properties.put("IsDemo", Boolean.toString(server.isDemo()));
+			am.Properties.put("IsLanMode", Boolean.toString(((IntegratedServer)server).getPublic()));
+		}
+
+		
+		String json = g.toJson(am);
+		return json;
+	}
+	
+	public String CreateClientKeepAlivePing() {
+		Gson g = new Gson();
+		
+		AnalyticsModel am = new AnalyticsModel();
+		am.Table = ForgeAnalyticsConstants.pingClientTable;
+		am.Properties = new HashMap<String, String>();
+		am.PartitionKey = ForgeAnalyticsConstants.pingClientKeepAlive;
+		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
+		am.Properties.putAll(this.getCommonValues());
+		
+		try {
+			// TODO figure this out...
+			am.Properties.put("UserHash", this.Anonymize(Minecraft.getMinecraft().thePlayer.getUniqueID().toString()));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String json = g.toJson(am);
+		return json;
+	}
+	
+	public String CreateServerKeepAlivePing() {
+		Gson g = new Gson();
+
+		AnalyticsModel am = new AnalyticsModel();
+		am.Table = ForgeAnalyticsConstants.pingServerTable;
+		am.Properties = new HashMap<String, String>();
+		am.PartitionKey = ForgeAnalyticsConstants.pingServerKeepAlive;
+		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
+		am.Properties.putAll(this.getCommonValues());
+		am.Properties.put("ServerDifficulty", MinecraftServer.getServer().getDifficulty().toString());
+		
+		MinecraftServer server = MinecraftServer.getServer();
+		
+		if (MinecraftServer.getServer().isDedicatedServer()) {
+			// Running dedicated...
+			try {
+				am.Properties.put("ServerHostHash", this.Anonymize(server.getHostname()));
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			am.Properties.put("ConnectedUsers", Integer.toString(server.getCurrentPlayerCount()));
+		}
+		else {
+			// Running internal...
+			am.Properties.put("ServerHostHash", "localhost");
+			am.Properties.put("IsDemo", Boolean.toString(server.isDemo()));
+			am.Properties.put("IsLanMode", Boolean.toString(((IntegratedServer)server).getPublic()));
+		}
+
+		
+		String json = g.toJson(am);
+		return json;
+	}
+
 	
 	private Map<String, String> getCommonValues() {
 		Map<String, String> commonValues = new HashMap<String, String>();
@@ -116,6 +205,10 @@ public class AnalyticsClient {
 		String modListCount = Integer.toString(net.minecraftforge.fml.common.Loader.instance().getModList().size());
 		String modList = "";
 		
+		commonValues.put("JavaVersion", System.getProperty("java.version"));
+		commonValues.put("JavaMaxRAM", Long.toString(Runtime.getRuntime().maxMemory()));
+		commonValues.put("JavaAllocatedRAM", Long.toString(Runtime.getRuntime().totalMemory()));
+		commonValues.put("SessionID", ForgeAnalyticsSingleton.getInstance().SessionID);
 		commonValues.put("MinecraftVersion", Minecraft.getMinecraft().getVersion());
 		commonValues.put("ForgeVersion", ForgeVersion.getVersion());
 		commonValues.put("MCPVersion", ForgeVersion.mcpVersion);
@@ -136,7 +229,7 @@ public class AnalyticsClient {
 	public String Anonymize(String data) throws NoSuchAlgorithmException {
 		MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 		byte[] dataBytes = data.getBytes();
-		for (int i=0; i< this.HASHCOUNT; i++) {
+		for (int i=0; i< ForgeAnalyticsConstants.HASHCOUNT; i++) {
 			dataBytes = sha256.digest(dataBytes);
 		}
 		
