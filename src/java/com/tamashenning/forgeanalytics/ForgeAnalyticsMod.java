@@ -1,10 +1,8 @@
 package com.tamashenning.forgeanalytics;
 
-import com.tamashenning.forgeanalyitcs.client.ForgeAnalyticsSingleton;
 import com.tamashenning.forgeanalytics.commands.AnalyticsCommands;
 import com.tamashenning.forgeanalytics.proxies.CommonProxy;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -15,8 +13,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

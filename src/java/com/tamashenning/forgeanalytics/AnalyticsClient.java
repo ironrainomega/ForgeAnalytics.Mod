@@ -25,18 +25,27 @@ import net.minecraftforge.fml.common.ModContainer;
 public class AnalyticsClient {
 	
 	public boolean UploadModel(AnalyticsModel model) throws Exception {
+
+		model.Properties.putAll(ForgeAnalyticsConstants.CustomProperties);
+		
 		Gson g = new Gson();
 		String json = g.toJson(model);
 
 		return this.UploadModel(json);
 	}
 	
-	public boolean UploadModel(String json) throws Exception {
+	private boolean UploadModel(String json) throws Exception {
+		
+		// Respect snooper settings...
+		if(!Minecraft.getMinecraft().isSnooperEnabled()) {
+			return false;
+		}
+		
 		System.out.println(json);
 		HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
 
 	    try {
-	        HttpPost request = new HttpPost("http://forgeanalytics.azurewebsites.net/api/Analytics");
+	        HttpPost request = new HttpPost(ForgeAnalyticsConstants.serverUrl);
 	        
 	        StringEntity params =new StringEntity(json);
 	        request.addHeader("content-type", "application/json");
@@ -52,9 +61,7 @@ public class AnalyticsClient {
 		return true;
 	}
 	
-	public String CreateClientStartupPing() {
-		Gson g = new Gson();
-		
+	public AnalyticsModel CreateClientStartupPing() {
 		AnalyticsModel am = new AnalyticsModel();
 		am.Table = ForgeAnalyticsConstants.pingClientTable;
 		am.Properties = new HashMap<String, String>();
@@ -62,21 +69,10 @@ public class AnalyticsClient {
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
 		
-		/*try {
-			// TODO figure this out...
-			// am.Properties.put("UserHash", this.Anonymize(Minecraft.getMinecraft().thePlayer.getUniqueID().toString()));
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		String json = g.toJson(am);
-		return json;
+		return am;
 	}
 	
-	public String CreateServerStartupPing() {
-		Gson g = new Gson();
-		
+	public AnalyticsModel CreateServerStartupPing() {
 		AnalyticsModel am = new AnalyticsModel();
 		am.Table = ForgeAnalyticsConstants.pingServerTable;
 		am.Properties = new HashMap<String, String>();
@@ -102,14 +98,11 @@ public class AnalyticsClient {
 			am.Properties.put("IsDemo", Boolean.toString(server.isDemo()));
 			am.Properties.put("IsLanMode", Boolean.toString(((IntegratedServer)server).getPublic()));
 		}
-	
-		String json = g.toJson(am);
-		return json;
+
+		return am;
 	}
 	
-	public String CreateServerStoppedPing() {
-		Gson g = new Gson();
-
+	public AnalyticsModel CreateServerStoppedPing() {
 		AnalyticsModel am = new AnalyticsModel();
 		am.Table = ForgeAnalyticsConstants.pingServerTable;
 		am.Properties = new HashMap<String, String>();
@@ -136,36 +129,21 @@ public class AnalyticsClient {
 			am.Properties.put("IsLanMode", Boolean.toString(((IntegratedServer)server).getPublic()));
 		}
 
-		
-		String json = g.toJson(am);
-		return json;
+		return am;
 	}
 	
-	public String CreateClientKeepAlivePing() {
-		Gson g = new Gson();
-		
+	public AnalyticsModel CreateClientKeepAlivePing() {
 		AnalyticsModel am = new AnalyticsModel();
 		am.Table = ForgeAnalyticsConstants.pingClientTable;
 		am.Properties = new HashMap<String, String>();
 		am.PartitionKey = ForgeAnalyticsConstants.pingClientKeepAlive;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
-		
-		try {
-			// TODO figure this out...
-			am.Properties.put("UserHash", this.Anonymize(Minecraft.getMinecraft().thePlayer.getUniqueID().toString()));
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		String json = g.toJson(am);
-		return json;
+
+		return am;
 	}
 	
-	public String CreateServerKeepAlivePing() {
-		Gson g = new Gson();
-
+	public AnalyticsModel CreateServerKeepAlivePing() {
 		AnalyticsModel am = new AnalyticsModel();
 		am.Table = ForgeAnalyticsConstants.pingServerTable;
 		am.Properties = new HashMap<String, String>();
@@ -193,9 +171,7 @@ public class AnalyticsClient {
 			am.Properties.put("IsLanMode", Boolean.toString(((IntegratedServer)server).getPublic()));
 		}
 
-		
-		String json = g.toJson(am);
-		return json;
+		return am;
 	}
 
 	
@@ -209,6 +185,7 @@ public class AnalyticsClient {
 		commonValues.put("JavaMaxRAM", Long.toString(Runtime.getRuntime().maxMemory()));
 		commonValues.put("JavaAllocatedRAM", Long.toString(Runtime.getRuntime().totalMemory()));
 		commonValues.put("SessionID", ForgeAnalyticsSingleton.getInstance().SessionID);
+		commonValues.put("AdID", ForgeAnalyticsConstants.AdID);
 		commonValues.put("MinecraftVersion", Minecraft.getMinecraft().getVersion());
 		commonValues.put("ForgeVersion", ForgeVersion.getVersion());
 		commonValues.put("MCPVersion", ForgeVersion.mcpVersion);

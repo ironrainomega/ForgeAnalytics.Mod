@@ -46,12 +46,12 @@ public class AnalyticsCommands implements ICommand {
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		// TODO Auto-generated method stub
-		if (sender instanceof EntityPlayer) {
+		/*if (sender instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer)sender;
 			AnalyticsClient ac = new AnalyticsClient();
 			String message = ac.CreateClientStartupPing();
 			player.addChatMessage(new ChatComponentText(message));
-		}
+		}*/
 		
 	}
 
