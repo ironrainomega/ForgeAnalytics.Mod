@@ -1,4 +1,4 @@
-package com.tamashenning.forgeanalyitcs.client;
+package com.tamashenning.forgeanalytics.client;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -9,26 +9,25 @@ import java.util.TimerTask;
 import com.tamashenning.forgeanalytics.AnalyticsClient;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
 
 public class ForgeAnalyticsSingleton {
 	private static ForgeAnalyticsSingleton instance = null;
 	private AnalyticsClient ac = new AnalyticsClient();
-	
+
 	public String SessionID = "";
-	
+
 	protected ForgeAnalyticsSingleton() {
 		SessionID = this.CreateID();
 	}
-	
+
 	public static ForgeAnalyticsSingleton getInstance() {
 		if (instance == null) {
 			instance = new ForgeAnalyticsSingleton();
 		}
-		
+
 		return instance;
 	}
-	
+
 	public String CreateID() {
 		String id = "";
 		SecureRandom random = new SecureRandom();
@@ -39,29 +38,28 @@ public class ForgeAnalyticsSingleton {
 		}
 		return id;
 	}
-	
+
 	public void StartKeepAliveTimer() {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
-			public void run(){
+			public void run() {
 				try {
 					// I'm running locally with no world loaded yet...
 					if (Minecraft.getMinecraft().theWorld == null) {
 						ac.UploadModel(ac.CreateClientKeepAlivePing());
-					}
-					else if (!Minecraft.getMinecraft().theWorld.isRemote) {
+					} else if (!Minecraft.getMinecraft().theWorld.isRemote) {
 						ac.UploadModel(ac.CreateClientKeepAlivePing());
-					}
-					else {
+					} else {
 						ac.UploadModel(ac.CreateServerKeepAlivePing());
 					}
 				} catch (Exception e) {
-					// 
+					//
 					e.printStackTrace();
-				};
+				}
+				;
 			}
 		}, ForgeAnalyticsConstants.KEEPALIVETIME, ForgeAnalyticsConstants.KEEPALIVETIME);
 	}
-	
+
 }

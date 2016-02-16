@@ -1,6 +1,5 @@
 package com.tamashenning.forgeanalytics;
 
-import com.tamashenning.forgeanalytics.commands.AnalyticsCommands;
 import com.tamashenning.forgeanalytics.proxies.CommonProxy;
 
 import net.minecraftforge.fml.common.Mod;
@@ -19,64 +18,64 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Mod(modid = ForgeAnalyticsMod.MODID, name = ForgeAnalyticsMod.MODNAME, version = ForgeAnalyticsMod.VERSION)
 public class ForgeAnalyticsMod {
 
-    public static final String MODID = "forgeanalytics";
-    public static final String MODNAME = "Forge Analytics";
-    public static final String VERSION = "0.0.1";
-    
-    @SidedProxy(clientSide="com.tamashenning.forgeanalytics.proxies.ClientProxy", serverSide="com.tamashenning.forgeanalytics.proxies.ServerProxy")
-    public static CommonProxy proxy;
-    
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent e) {
-        proxy.preInit(e);
-    }
+	public static final String MODID = "forgeanalytics";
+	public static final String MODNAME = "Forge Analytics";
+	public static final String VERSION = "0.0.4";
 
-    @EventHandler
-    public void init(FMLInitializationEvent e) {
-        proxy.init(e);
-    }
+	@SidedProxy(clientSide = "com.tamashenning.forgeanalytics.proxies.ClientProxy", serverSide = "com.tamashenning.forgeanalytics.proxies.ServerProxy")
+	public static CommonProxy proxy;
 
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent e) {
-        proxy.postInit(e);
-    }
-    
-    @EventHandler
-    public void serverLoad(FMLServerStartingEvent e) {
-    	e.registerServerCommand(new AnalyticsCommands());
-    }
-    
-    @EventHandler
-    public void serverStarted(FMLServerStartedEvent e) {
-        AnalyticsClient ac = new AnalyticsClient();
-        try {
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent e) {
+		proxy.preInit(e);
+	}
+
+	@EventHandler
+	public void init(FMLInitializationEvent e) {
+		proxy.init(e);
+	}
+
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent e) {
+		proxy.postInit(e);
+	}
+
+	@EventHandler
+	public void serverLoad(FMLServerStartingEvent e) {
+
+	}
+
+	@EventHandler
+	public void serverStarted(FMLServerStartedEvent e) {
+		AnalyticsClient ac = new AnalyticsClient();
+		try {
 			ac.UploadModel(ac.CreateServerStartupPing());
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-    }  
-    
-    @EventHandler
-    public void serverStopped(FMLServerStoppedEvent e) {
-        AnalyticsClient ac = new AnalyticsClient();
-        try {
+	}
+
+	@EventHandler
+	public void serverStopped(FMLServerStoppedEvent e) {
+		AnalyticsClient ac = new AnalyticsClient();
+		try {
 			ac.UploadModel(ac.CreateServerStoppedPing());
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-    }
-  
-    @SideOnly(Side.CLIENT)
-    @EventHandler
-    public void fmlLoaded(FMLLoadCompleteEvent e){
-    	AnalyticsClient ac = new AnalyticsClient();
-    	try {
+	}
+
+	@SideOnly(Side.CLIENT)
+	@EventHandler
+	public void fmlLoaded(FMLLoadCompleteEvent e) {
+		AnalyticsClient ac = new AnalyticsClient();
+		try {
 			ac.UploadModel(ac.CreateClientStartupPing());
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-    }
+	}
 }
