@@ -49,7 +49,7 @@ public class ForgeAnalyticsMod {
 	public void serverStarted(FMLServerStartedEvent e) {
 		AnalyticsClient ac = new AnalyticsClient();
 		try {
-			ac.UploadModel(ac.CreateServerStartupPing());
+			ac.UploadModel(ac.CreateServerStartupPing(), false);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -60,19 +60,7 @@ public class ForgeAnalyticsMod {
 	public void serverStopped(FMLServerStoppedEvent e) {
 		AnalyticsClient ac = new AnalyticsClient();
 		try {
-			ac.UploadModel(ac.CreateServerStoppedPing());
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
-
-	@SideOnly(Side.CLIENT)
-	@EventHandler
-	public void fmlLoaded(FMLLoadCompleteEvent e) {
-		AnalyticsClient ac = new AnalyticsClient();
-		try {
-			ac.UploadModel(ac.CreateClientStartupPing());
+			ac.UploadModel(ac.CreateServerStoppedPing(), false);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

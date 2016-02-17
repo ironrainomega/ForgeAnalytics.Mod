@@ -24,21 +24,28 @@ import net.minecraftforge.fml.common.ModContainer;
 
 public class AnalyticsClient {
 
-	public boolean UploadModel(AnalyticsModel model) throws Exception {
+	public boolean UploadModel(AnalyticsModel model, boolean isClient) throws Exception {
 
 		model.Properties.putAll(ForgeAnalyticsConstants.CustomProperties);
 
 		Gson g = new Gson();
 		String json = g.toJson(model);
 
-		return this.UploadModel(json);
+		return this.UploadModel(json, isClient);
 	}
 
-	private boolean UploadModel(String json) throws Exception {
+	private boolean UploadModel(String json, boolean isClient) throws Exception {
 
-		// Respect snooper settings...
-		if (!Minecraft.getMinecraft().isSnooperEnabled()) {
-			return false;
+		if (isClient) {
+			// Respect snooper settings...
+			if (!Minecraft.getMinecraft().isSnooperEnabled()) {
+				return false;
+			}
+		} else {
+			// Respect snooper settings...
+			if (!MinecraftServer.getServer().isSnooperEnabled()) {
+				return false;
+			}
 		}
 
 		System.out.println(json);

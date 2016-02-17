@@ -54,6 +54,6 @@ public class CommonProxy {
 	}
 
 	public void postInit(FMLPostInitializationEvent e) {
-		ForgeAnalyticsSingleton.getInstance().StartKeepAliveTimer();
+		
 	}
 }

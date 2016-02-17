@@ -39,7 +39,7 @@ public class ForgeAnalyticsSingleton {
 		return id;
 	}
 
-	public void StartKeepAliveTimer() {
+	public void StartKeepAliveTimer(final boolean isClient) {
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -47,11 +47,11 @@ public class ForgeAnalyticsSingleton {
 				try {
 					// I'm running locally with no world loaded yet...
 					if (Minecraft.getMinecraft().theWorld == null) {
-						ac.UploadModel(ac.CreateClientKeepAlivePing());
+						ac.UploadModel(ac.CreateClientKeepAlivePing(), isClient);
 					} else if (!Minecraft.getMinecraft().theWorld.isRemote) {
-						ac.UploadModel(ac.CreateClientKeepAlivePing());
+						ac.UploadModel(ac.CreateClientKeepAlivePing(), isClient);
 					} else {
-						ac.UploadModel(ac.CreateServerKeepAlivePing());
+						ac.UploadModel(ac.CreateServerKeepAlivePing(), isClient);
 					}
 				} catch (Exception e) {
 					//
@@ -61,5 +61,4 @@ public class ForgeAnalyticsSingleton {
 			}
 		}, ForgeAnalyticsConstants.KEEPALIVETIME, ForgeAnalyticsConstants.KEEPALIVETIME);
 	}
-
 }
