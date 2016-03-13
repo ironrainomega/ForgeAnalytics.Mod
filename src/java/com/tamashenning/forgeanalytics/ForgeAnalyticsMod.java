@@ -1,32 +1,39 @@
 package com.tamashenning.forgeanalytics;
 
-import com.tamashenning.forgeanalytics.proxies.CommonProxy;
+import java.util.logging.Logger;
 
+import com.tamashenning.forgeanalytics.proxies.CommonProxy;
+import com.tamashenning.forgeanalytics.client.*;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod(modid = ForgeAnalyticsMod.MODID, name = ForgeAnalyticsMod.MODNAME, version = ForgeAnalyticsMod.VERSION)
+@Mod(modid = ForgeAnalyticsMod.MODID, name = ForgeAnalyticsMod.MODNAME, version = ForgeAnalyticsMod.VERSION, guiFactory = ForgeAnalyticsMod.GUIFACTORY)
 public class ForgeAnalyticsMod {
 
 	public static final String MODID = "forgeanalytics";
 	public static final String MODNAME = "Forge Analytics";
-	public static final String VERSION = "0.0.4";
+	public static final String VERSION = "0.0.0.13";
+	public static final String GUIFACTORY = "com.tamashenning.forgeanalytics.gui.GuiFactory";
+
+	@Instance(ForgeAnalyticsMod.MODID)
+	public static ForgeAnalyticsMod instance;
 
 	@SidedProxy(clientSide = "com.tamashenning.forgeanalytics.proxies.ClientProxy", serverSide = "com.tamashenning.forgeanalytics.proxies.ServerProxy")
 	public static CommonProxy proxy;
 
+	public static Logger logger;
+	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
+		// logger = e.getModLog();
 		proxy.preInit(e);
 	}
 
@@ -65,5 +72,7 @@ public class ForgeAnalyticsMod {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		ForgeAnalyticsSingleton.getInstance().CancelTimer();
 	}
 }

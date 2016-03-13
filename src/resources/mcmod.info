@@ -1,0 +1,15 @@
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "forgeanalytics",
+    "name": "Forge Analytics",
+    "description": "Basic analytics mod sending data for Forge. All sent data can be viewed under the config section and individually opted out. To fully disable remove the mod or disable snooper.",
+    "version": "0.0.0.14",
+    "mcversion": "1.7.10",
+    "url": "http://files.minecraftforge.net/",
+    "updateUrl": "",
+    "authorList": [ "TamasHenning" ],
+    "credits": "LexManos, LatvianModder, Pahimar and a few more awesome folks.",
+    "logoFile": ""
+  }]
+}
