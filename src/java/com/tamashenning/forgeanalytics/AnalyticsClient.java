@@ -74,7 +74,7 @@ public class AnalyticsClient {
 				dataForge.add(entry.getKey(), new JsonPrimitive(entry.getValue()));
 			}
 		}
-
+		// System.out.println(json);
 		this.UploadForge(dataForge.toString());
 		return this.UploadModel(json, isClient);
 	}
@@ -187,19 +187,25 @@ public class AnalyticsClient {
 
 		} else {
 			// Respect snooper settings...
-			if (!MinecraftServer.getServer().isSnooperEnabled()) {
+			try {
+				if (!MinecraftServer.getServer().isSnooperEnabled()) {
+					return false;
+				}
+				MinecraftForge.EVENT_BUS.post(new AnalyticsEvent(net.minecraftforge.fml.relauncher.Side.SERVER));
+			} catch (Exception e) {
+				// First time server init???
 				return false;
 			}
-
-			MinecraftForge.EVENT_BUS.post(new AnalyticsEvent(net.minecraftforge.fml.relauncher.Side.SERVER));
+			
 		}
 		return true;
 	}
 
 	private Map<String, String> getCommonValues() {
 		Map<String, String> commonValues = new HashMap<String, String>();
-		
-		String activeModListCount = Integer.toString(net.minecraftforge.fml.common.Loader.instance().getActiveModList().size());
+
+		String activeModListCount = Integer
+				.toString(net.minecraftforge.fml.common.Loader.instance().getActiveModList().size());
 
 		String modListCount = Integer.toString(net.minecraftforge.fml.common.Loader.instance().getModList().size());
 		// String modList = "";
@@ -240,7 +246,6 @@ public class AnalyticsClient {
 			request.addHeader("content-type", "application/json");
 			request.setEntity(params);
 			HttpResponse response = httpClient.execute(request);
-			
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -261,7 +266,7 @@ public class AnalyticsClient {
 
 			request.setEntity(new UrlEncodedFormEntity(nvp));
 			HttpResponse response = httpClient.execute(request);
-			
+
 		} catch (Exception ex) {
 			// handle exception here
 			ex.printStackTrace();
