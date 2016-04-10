@@ -20,7 +20,7 @@ public class ForgeAnalyticsMod {
 
 	public static final String MODID = "forgeanalytics";
 	public static final String MODNAME = "Forge Analytics";
-	public static final String VERSION = "0.0.0.13";
+	public static final String VERSION = "0.0.0.16";
 	public static final String GUIFACTORY = "com.tamashenning.forgeanalytics.gui.GuiFactory";
 
 	@Instance(ForgeAnalyticsMod.MODID)
@@ -29,6 +29,9 @@ public class ForgeAnalyticsMod {
 	@SidedProxy(clientSide = "com.tamashenning.forgeanalytics.proxies.ClientProxy", serverSide = "com.tamashenning.forgeanalytics.proxies.ServerProxy")
 	public static CommonProxy proxy;
 
+	@SidedProxy(clientSide = "com.tamashenning.forgeanalytics.client.AnalyticsClientSide", serverSide = "com.tamashenning.forgeanalytics.client.AnalyticsCommon")
+	public static AnalyticsCommon proxiedClient;
+	
 	public static Logger logger;
 	
 	@EventHandler
@@ -54,13 +57,7 @@ public class ForgeAnalyticsMod {
 
 	@EventHandler
 	public void serverStarted(FMLServerStartedEvent e) {
-		AnalyticsClient ac = new AnalyticsClient();
-		try {
-			ac.UploadModel(ac.CreateServerStartupPing(), false);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 	}
 
 	@EventHandler

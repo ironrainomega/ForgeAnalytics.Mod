@@ -7,11 +7,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import com.tamashenning.forgeanalytics.AnalyticsClient;
+import com.tamashenning.forgeanalytics.ForgeAnalyticsMod;
 
 public class ForgeAnalyticsSingleton {
 	private static ForgeAnalyticsSingleton instance = null;
-	private AnalyticsClient ac = new AnalyticsClient();
 	private Timer timer = new Timer();
 
 	public String SessionID = "";
@@ -34,7 +33,7 @@ public class ForgeAnalyticsSingleton {
 		String id = "";
 		SecureRandom random = new SecureRandom();
 		try {
-			id = ac.Anonymize(new BigInteger(130, random).toString(32));
+			id = ForgeAnalyticsMod.proxiedClient.Anonymize(new BigInteger(130, random).toString(32));
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -47,12 +46,7 @@ public class ForgeAnalyticsSingleton {
 			public void run() {
 				
 				try {
-					if (!isClient) {
-						ac.UploadModel(ac.CreateServerKeepAlivePing(), isClient);
-					} else {
-						ac.UploadModel(ac.CreateClientKeepAlivePing(), isClient);
-					}
-
+					ForgeAnalyticsMod.proxiedClient.UploadModel(ForgeAnalyticsMod.proxiedClient.CreateKeepAlivePing(), isClient);
 				} catch (Exception e) {
 					//
 					e.printStackTrace();

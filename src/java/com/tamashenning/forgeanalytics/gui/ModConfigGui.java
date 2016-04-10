@@ -3,7 +3,6 @@ package com.tamashenning.forgeanalytics.gui;
 import java.util.List;
 import java.util.Map;
 
-import com.tamashenning.forgeanalytics.AnalyticsClient;
 import com.tamashenning.forgeanalytics.ForgeAnalyticsMod;
 import com.tamashenning.forgeanalytics.client.ForgeAnalyticsConstants;
 import com.tamashenning.forgeanalytics.models.AnalyticsModel;
@@ -25,9 +24,8 @@ public class ModConfigGui extends GuiConfig {
 		// new
 		// ConfigElement(ForgeAnalyticsConstants.dataConfig.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements()
 
-		AnalyticsClient ac = new AnalyticsClient();
-		AnalyticsModel am = ac.CreateClientKeepAlivePing();
-		if (!ac.FireEvent(true)) {
+		AnalyticsModel am = ForgeAnalyticsMod.proxiedClient.CreateKeepAlivePing();
+		if (!ForgeAnalyticsMod.proxiedClient.FireEvent()) {
 			// Snooper is off...
 			ForgeAnalyticsConstants.dataConfig.get(Configuration.CATEGORY_GENERAL, "Snooper", "Off");
 			return new ConfigElement(ForgeAnalyticsConstants.dataConfig.getCategory(Configuration.CATEGORY_GENERAL))

@@ -1,7 +1,6 @@
-package com.tamashenning.forgeanalytics;
+package com.tamashenning.forgeanalytics.client;
 
 import java.security.MessageDigest;
-
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +18,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.tamashenning.forgeanalytics.client.ForgeAnalyticsConstants;
-import com.tamashenning.forgeanalytics.client.ForgeAnalyticsSingleton;
 import com.tamashenning.forgeanalytics.events.AnalyticsEvent;
 import com.tamashenning.forgeanalytics.models.AnalyticsModel;
 
@@ -32,12 +29,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-@Deprecated
-public class AnalyticsClient {
+public class AnalyticsCommon {
 
 	public boolean UploadModel(AnalyticsModel model, boolean isClient) throws Exception {
 
-		if (!FireEvent(isClient)) {
+		if (!FireEvent()) {
 			return false;
 		}
 
@@ -79,19 +75,18 @@ public class AnalyticsClient {
 			}
 		}
 
-		System.out.println(json);
+		// System.out.println(json);
 		this.UploadForge(dataForge.toString());
 		return this.UploadModel(json, isClient);
 	}
 
-	public AnalyticsModel CreateClientStartupPing() {
+	public AnalyticsModel CreateKeepAlivePing() {
 		AnalyticsModel am = new AnalyticsModel();
-		am.Table = ForgeAnalyticsConstants.pingClientTable;
+		am.Table = ForgeAnalyticsConstants.pingServerTable;
 		am.Properties = new HashMap<String, String>();
-		am.PartitionKey = ForgeAnalyticsConstants.pingClientStartCommand;
+		am.PartitionKey = ForgeAnalyticsConstants.pingServerKeepAlive;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
-
 		return am;
 	}
 
@@ -102,19 +97,6 @@ public class AnalyticsClient {
 		am.PartitionKey = ForgeAnalyticsConstants.pingServerStartCommand;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
-		// am.Properties.put("ServerDifficulty",
-		// MinecraftServer.getServer().getDifficulty().toString());
-
-		/*
-		 * MinecraftServer server = MinecraftServer.getServer();
-		 * 
-		 * if (MinecraftServer.getServer().isDedicatedServer()) { // Running
-		 * dedicated... try { am.Properties.put("ServerHostHash",
-		 * this.Anonymize(server.getHostname())); } catch
-		 * (NoSuchAlgorithmException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } } else { // Running internal...
-		 * am.Properties.put("ServerHostHash", "localhost"); }
-		 */
 
 		return am;
 	}
@@ -126,92 +108,29 @@ public class AnalyticsClient {
 		am.PartitionKey = ForgeAnalyticsConstants.pingServerStopCommand;
 		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
 		am.Properties.putAll(this.getCommonValues());
-		// am.Properties.put("ServerDifficulty",
-		// MinecraftServer.getServer().getDifficulty().toString());
-
-		/*
-		 * MinecraftServer server = MinecraftServer.getServer();
-		 * 
-		 * if (MinecraftServer.getServer().isDedicatedServer()) { // Running
-		 * dedicated... try { am.Properties.put("ServerHostHash",
-		 * this.Anonymize(server.getHostname())); } catch
-		 * (NoSuchAlgorithmException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } } else { // Running internal...
-		 * am.Properties.put("ServerHostHash", "localhost"); }
-		 */
 
 		return am;
 	}
 
-	public AnalyticsModel CreateClientKeepAlivePing() {
-		AnalyticsModel am = new AnalyticsModel();
-		am.Table = ForgeAnalyticsConstants.pingClientTable;
-		am.Properties = new HashMap<String, String>();
-		am.PartitionKey = ForgeAnalyticsConstants.pingClientKeepAlive;
-		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
-		am.Properties.putAll(this.getCommonValues());
-
-		return am;
-	}
-
-	public AnalyticsModel CreateServerKeepAlivePing() {
-		AnalyticsModel am = new AnalyticsModel();
-		am.Table = ForgeAnalyticsConstants.pingServerTable;
-		am.Properties = new HashMap<String, String>();
-		am.PartitionKey = ForgeAnalyticsConstants.pingServerKeepAlive;
-		am.ClientDateTimeEpoch = System.currentTimeMillis() / 1000L;
-		am.Properties.putAll(this.getCommonValues());
-		// am.Properties.put("ServerDifficulty",
-		// MinecraftServer.getServer().getDifficulty().toString());
-
-		/*
-		 * Removing this part for now... MinecraftServer server =
-		 * MinecraftServer.getServer();
-		 * 
-		 * if (MinecraftServer.getServer().isDedicatedServer()) { // Running
-		 * dedicated... try { if (server != null) {
-		 * am.Properties.put("ServerHostHash",
-		 * this.Anonymize(server.getHostname())); } } catch
-		 * (NoSuchAlgorithmException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } am.Properties.put("ConnectedUsers",
-		 * Integer.toString(server.getCurrentPlayerCount())); } else { //
-		 * Running internal... am.Properties.put("ServerHostHash", "localhost");
-		 * }
-		 */
-
-		return am;
-	}
-
-	public boolean FireEvent(boolean isClient) {
-		if (isClient) {
-			// Respect snooper settings...
-			if (!Minecraft.getMinecraft().isSnooperEnabled()) {
-				return false;
-			}
-			MinecraftForge.EVENT_BUS.post(new AnalyticsEvent(net.minecraftforge.fml.relauncher.Side.CLIENT));
-
-		} else {
-			// Respect snooper settings...
-			try {
-				MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-				if (server.getClass().equals(DedicatedServer.class)) {
-					DedicatedServer ds = (DedicatedServer) server;
-					if (!ds.isSnooperEnabled()) {
-						return false;
-					}
+	public boolean FireEvent() {
+		try {
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+			if (server.getClass().equals(DedicatedServer.class)) {
+				DedicatedServer ds = (DedicatedServer) server;
+				if (!ds.isSnooperEnabled()) {
+					return false;
 				}
-
-				MinecraftForge.EVENT_BUS.post(new AnalyticsEvent(net.minecraftforge.fml.relauncher.Side.SERVER));
-			} catch (Exception e) {
-				// First time server init???
-				return false;
 			}
 
+			MinecraftForge.EVENT_BUS.post(new AnalyticsEvent(net.minecraftforge.fml.relauncher.Side.SERVER));
+		} catch (Exception e) {
+			// First time server init???
+			return false;
 		}
 		return true;
 	}
 
-	private Map<String, String> getCommonValues() {
+	protected Map<String, String> getCommonValues() {
 		Map<String, String> commonValues = new HashMap<String, String>();
 
 		String activeModListCount = Integer
@@ -234,18 +153,11 @@ public class AnalyticsClient {
 		commonValues.put("ActiveModCount", activeModListCount);
 		commonValues.put("ModCount", modListCount);
 		commonValues.put("ModPack", ForgeAnalyticsConstants.modPack);
-		/*
-		 * for (ModContainer mod :
-		 * cpw.mods.fml.common.Loader.instance().getModList()) { modList +=
-		 * mod.getModId() + "@" + mod.getVersion() + ";"; }
-		 * 
-		 * commonValues.put("ModList", modList);
-		 */
 
 		return commonValues;
 	}
 
-	private boolean UploadModel(String json, boolean isClient) throws Exception {
+	protected boolean UploadModel(String json, boolean isClient) throws Exception {
 
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -264,7 +176,7 @@ public class AnalyticsClient {
 		return true;
 	}
 
-	private void UploadForge(String json) throws Exception {
+	protected void UploadForge(String json) throws Exception {
 
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -295,7 +207,7 @@ public class AnalyticsClient {
 
 	final protected char[] hexArray = "0123456789abcdef".toCharArray();
 
-	private String bytesToHex(byte[] bytes) {
+	protected String bytesToHex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];
 		for (int j = 0; j < bytes.length; j++) {
 			int v = bytes[j] & 0xFF;
@@ -304,4 +216,5 @@ public class AnalyticsClient {
 		}
 		return new String(hexChars);
 	}
+
 }

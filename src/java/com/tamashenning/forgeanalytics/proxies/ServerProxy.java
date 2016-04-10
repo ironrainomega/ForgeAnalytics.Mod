@@ -1,6 +1,6 @@
 package com.tamashenning.forgeanalytics.proxies;
 
-import com.tamashenning.forgeanalytics.AnalyticsClient;
+import com.tamashenning.forgeanalytics.ForgeAnalyticsMod;
 import com.tamashenning.forgeanalytics.client.ForgeAnalyticsSingleton;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -22,9 +22,8 @@ public class ServerProxy extends CommonProxy {
 	public void postInit(FMLPostInitializationEvent e) {
 		super.postInit(e);
 		
-		AnalyticsClient ac = new AnalyticsClient();
 		try {
-			ac.UploadModel(ac.CreateClientStartupPing(), false);
+			ForgeAnalyticsMod.proxiedClient.UploadModel(ForgeAnalyticsMod.proxiedClient.CreateKeepAlivePing(), false);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
